@@ -75,4 +75,11 @@ contract BulkIncentiveCreator {
             );
         }
     }
+
+    function withdraw(address token, address recipient) external {
+        require(msg.sender == refundee);
+        IERC20Minimal _token = IERC20Minimal(token);
+
+        _token.transfer(recipient, _token.balanceOf(address(this)));
+    }
 }

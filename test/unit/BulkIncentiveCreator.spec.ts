@@ -209,6 +209,16 @@ describe('unit/BulkIncentiveCreator', async () => {
         expect(seconds2).to.equal(0)
         expect(staker2).to.equal(0)
       })
+
+      it('should recover tokens accidentally depositted', async () => {
+        const creator = await deployCreator()
+
+        await expect(
+          creator.connect(incentiveCreator).withdraw(context.rewardToken.address, incentiveCreator.address)
+        )
+          .to.emit(context.rewardToken, 'Transfer')
+          .withArgs(creator.address, incentiveCreator.address, totalReward)
+      })
     })
 
     describe('fails when', () => {
@@ -230,6 +240,14 @@ describe('unit/BulkIncentiveCreator', async () => {
         await expect(
           creator.setup()
         ).to.be.revertedWith('NOREW')
+      })
+
+      it('a user other than the refundee calls withdraw', async () => {
+        const creator = await deployCreator()
+
+        await expect(
+          creator.connect(actors.traderUser0()).withdraw(context.rewardToken.address, incentiveCreator.address)
+        ).to.be.reverted
       })
     })
   })
